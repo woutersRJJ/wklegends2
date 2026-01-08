@@ -1,7 +1,6 @@
 import {useEffect, useState} from "react";
 import PlayerCard from "./PlayerCard";
-import {getCollection, update} from "../services/firestore";
-import {toast} from "react-toastify";
+import {getCollection} from "../services/firestore";
 
 export default function PlayerGrid() {
 
