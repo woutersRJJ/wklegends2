@@ -99,7 +99,9 @@
     padding: 10px;
     border-radius: 6px;
     border: 1px solid #bdc3c7;
-    background: #fdfdfd;
+    /*background: #fdfdfd;*/
+    background:#4363be;
+    color: #cbd5f5;
     font-size: 15px;
     outline: none;
     transition: border 0.2s ease;
@@ -238,3 +240,10 @@
     from { opacity: 0; transform: translateY(-10px); }
     to   { opacity: 1; transform: translateY(0); }
 }
+
+.crud-icon svg {
+    fill: #38bdf8 !important;
+}
+
+
+
