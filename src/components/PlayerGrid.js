@@ -8,7 +8,9 @@ export default function PlayerGrid() {
     const [players,setPlayers]=useState([])
 
     useEffect(() => {
-        loadPlayers().then(()=>console.log('players ingelezen'));
+        loadPlayers()
+       /* loadPlayers().then(()=>
+            console.log('players read'));*/
     }, []);
 
     async function loadPlayers() {

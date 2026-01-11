@@ -30,7 +30,6 @@ export async function getCollection(collection) {
 
 export async function update(player){
     if (!firestoreDatabase) return;
-    console.log(player)
 
     const doc=firestoreDatabase.collection('legends').doc(player.id);
     await doc.update(player)

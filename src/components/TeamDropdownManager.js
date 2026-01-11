@@ -7,7 +7,7 @@ import {toast} from "react-toastify";
 
 export default function TeamDropdownManager({player}) {
     const [teams, setTeams] = useState(player.teams);
-    const [selectedTeam, setSelectedTeam] = useState("");
+    const [selectedTeam, setSelectedTeam] = useState(0);
 
     // Modal state
     const [isAddOpen, setIsAddOpen] = useState(false);
@@ -36,20 +36,21 @@ export default function TeamDropdownManager({player}) {
     }
 
     // Keep selection synced when teams change
-    useEffect(() => {
+    /*useEffect(() => {
         if (teams.length > 0) {
-            setSelectedTeam(teams[0]);
+            setSelectedTeam(teams[setSelectedTeam]);
         } else {
-            setSelectedTeam("");
+            setSelectedTeam(0);
         }
-    }, [teams]);
+    }, [teams]);*/
 
     // CREATE
     const handleAdd = () => {
         if (!tempValue.trim()) return;
 
-        player.teams=[...player.teams, tempValue]
+        player.teams = [...player.teams, tempValue].sort((a,b)=>a.localeCompare(b))
         setTeams(player.teams)
+        setSelectedTeam(player.teams.findIndex(t=>t === tempValue)); // select new team in dropdown
         updatePlayer(player, 'create');
 
         setTempValue("");
@@ -60,25 +61,38 @@ export default function TeamDropdownManager({player}) {
     const handleUpdate = () => {
         if (!tempValue.trim()) return;
 
-        player.teams=player.teams.map(t =>
-            t === selectedTeam ? tempValue : t
+        player.teams = player.teams.map((t, index) =>
+            index === selectedTeam ? tempValue : t
         )
-
-       /* const updatedTeams = player.teams.map(t =>
-            t === selectedTeam ? tempValue : t
-        );*/
 
         setTeams(player.teams);
         updatePlayer(player, 'update')
 
-        setSelectedTeam(tempValue); // keep selection on updated item
+        setSelectedTeam(selectedTeam); // keep selection on updated item
         setTempValue("");
         setIsEditOpen(false);
     };
 
     // DELETE (after confirmation)
     const confirmDelete = () => {
-        player.teams=player.teams.filter(t => t !== selectedTeam)
+        //if list becomes empty, no selection
+        //if not item at end of list, select next
+        //if item at end of list, select previous
+
+        //j is index of item that should be selected after deletion
+        let j=0
+        if (teams.length>1){
+            let i=teams.findIndex(t=>t === selectedTeam)
+            if (teams.length-i===1){
+                j=i-1
+            }
+            else{
+                j=i+1
+            }
+        }
+        setSelectedTeam(j)
+        
+        player.teams = player.teams.filter(t => t !== teams[selectedTeam])
         setTeams(player.teams);
         updatePlayer(player, 'delete')
 
@@ -91,13 +105,14 @@ export default function TeamDropdownManager({player}) {
 
             {/* READ */}
             <select className="team-select"
-                    value={selectedTeam}
-                    onChange={(e) => setSelectedTeam(e.target.value)}
-                    style={{width: "100%", padding: 8}}
+                    value={teams[selectedTeam]}
+                    onChange={(e) => {
+                        setSelectedTeam(e.target.selectedIndex);
+                    }}
                     size={1}
             >
-                {teams.map(team => (
-                    <option key={team} value={team}>
+                {teams.sort((a, b) => a.localeCompare(b)).map((team, index) => (
+                    <option key={index} value={team}>
                         {team}
                     </option>
                 ))}
@@ -121,10 +136,10 @@ export default function TeamDropdownManager({player}) {
                     theme="light"
                     size="medium"
                     onClick={() => {
-                        setTempValue(selectedTeam);
+                        setTempValue(teams[selectedTeam]);
                         setIsEditOpen(true);
                     }}
-                    disabled={!selectedTeam}
+                    disabled={!teams.length>0}
                 />
                 <Icon
                     name="delete"
@@ -132,7 +147,7 @@ export default function TeamDropdownManager({player}) {
                     theme="light"
                     size="medium"
                     onClick={() => setIsDeleteOpen(true)}
-                    disabled={!selectedTeam}
+                    disabled={!teams.length>0}
                 />
             </div>
 
@@ -166,7 +181,7 @@ export default function TeamDropdownManager({player}) {
                 <Modal onClose={() => setIsDeleteOpen(false)}>
                     <h3>Club verwijderen</h3>
                     <p>
-                        <strong>{selectedTeam} </strong>verwijderen?
+                        <strong>{teams[selectedTeam]} </strong>verwijderen?
                     </p>
                     <button className="modal-delete" onClick={confirmDelete}>
                         Ja, verwijder
